@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { connectDatabase } from "./config/database";
+import authRoutes from "./routes/auth.route"; // dòng mới
 
 dotenv.config();
 
@@ -16,6 +17,8 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.json({ message: "Recruitment API is running" });
 });
+
+app.use("/api/auth", authRoutes); // dòng mới
 
 const startServer = async () => {
   await connectDatabase();
