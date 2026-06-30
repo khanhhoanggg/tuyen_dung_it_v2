@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+// XÓA DÒNG: import { AuthRequest } from "../middlewares/auth.middleware"; -> Không cần nữa
 import User from "../models/user.model";
 import { registerSchema, loginSchema } from "../validates/auth.validate";
 import {
@@ -123,6 +124,35 @@ export const login = async (req: Request, res: Response) => {
     });
   } catch (err) {
     console.error("Login error:", err);
+    return res.status(500).json({
+      code: "server_error",
+      message: "Có lỗi xảy ra, vui lòng thử lại sau",
+    });
+  }
+};
+
+// SỬA TẠI ĐÂY: Chuyển đổi AuthRequest thành Request chuẩn gốc của Express
+export const getMe = async (req: Request, res: Response) => {
+  try {
+    // req.user lúc này tự động nhận diện cấu trúc sub, email, role nhờ declare global
+    const userId = req.user?.sub;
+
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        code: "not_found",
+        message: "Không tìm thấy người dùng",
+      });
+    }
+
+    return res.status(200).json({
+      code: "success",
+      message: "Lấy thông tin thành công",
+      data: user,
+    });
+  } catch (err) {
+    console.error("Get me error:", err);
     return res.status(500).json({
       code: "server_error",
       message: "Có lỗi xảy ra, vui lòng thử lại sau",

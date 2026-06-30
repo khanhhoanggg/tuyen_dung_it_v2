@@ -1,9 +1,13 @@
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { connectDatabase } from "./config/database";
-import authRoutes from "./routes/auth.route"; // dòng mới
+import authRoutes from "./routes/auth.route";
 
 dotenv.config();
 
@@ -18,7 +22,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Recruitment API is running" });
 });
 
-app.use("/api/auth", authRoutes); // dòng mới
+app.use("/api/auth", authRoutes);
 
 const startServer = async () => {
   await connectDatabase();
