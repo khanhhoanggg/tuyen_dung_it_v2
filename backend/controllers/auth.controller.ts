@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-// XÓA DÒNG: import { AuthRequest } from "../middlewares/auth.middleware"; -> Không cần nữa
 import User from "../models/user.model";
 import { registerSchema, loginSchema } from "../validates/auth.validate";
 import {
@@ -23,18 +22,16 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const { fullName, email, password } = value;
-
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
       return res.status(409).json({
         code: "email_already_exists",
-        message: "Email đã được sử dụng",
+        message: "Email da duoc su dung",
       });
     }
 
     const hashedPassword = await hashPassword(password);
-
     const newUser = await User.create({
       fullName,
       email,
@@ -43,7 +40,7 @@ export const register = async (req: Request, res: Response) => {
 
     return res.status(201).json({
       code: "success",
-      message: "Đăng ký tài khoản thành công",
+      message: "Dang ky tai khoan thanh cong",
       data: {
         id: newUser._id,
         fullName: newUser.fullName,
@@ -54,7 +51,7 @@ export const register = async (req: Request, res: Response) => {
     console.error("Register error:", err);
     return res.status(500).json({
       code: "server_error",
-      message: "Có lỗi xảy ra, vui lòng thử lại sau",
+      message: "Co loi xay ra, vui long thu lai sau",
     });
   }
 };
@@ -73,13 +70,12 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const { email, password } = value;
-
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(401).json({
         code: "invalid_credentials",
-        message: "Email hoặc mật khẩu không đúng",
+        message: "Email hoac mat khau khong dung",
       });
     }
 
@@ -88,7 +84,7 @@ export const login = async (req: Request, res: Response) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         code: "invalid_credentials",
-        message: "Email hoặc mật khẩu không đúng",
+        message: "Email hoac mat khau khong dung",
       });
     }
 
@@ -111,7 +107,7 @@ export const login = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       code: "success",
-      message: "Đăng nhập thành công",
+      message: "Dang nhap thanh cong",
       data: {
         accessToken,
         user: {
@@ -126,36 +122,33 @@ export const login = async (req: Request, res: Response) => {
     console.error("Login error:", err);
     return res.status(500).json({
       code: "server_error",
-      message: "Có lỗi xảy ra, vui lòng thử lại sau",
+      message: "Co loi xay ra, vui long thu lai sau",
     });
   }
 };
 
-// SỬA TẠI ĐÂY: Chuyển đổi AuthRequest thành Request chuẩn gốc của Express
 export const getMe = async (req: Request, res: Response) => {
   try {
-    // req.user lúc này tự động nhận diện cấu trúc sub, email, role nhờ declare global
     const userId = req.user?.sub;
-
     const user = await User.findById(userId).select("-password");
 
     if (!user) {
       return res.status(404).json({
         code: "not_found",
-        message: "Không tìm thấy người dùng",
+        message: "Khong tim thay nguoi dung",
       });
     }
 
     return res.status(200).json({
       code: "success",
-      message: "Lấy thông tin thành công",
+      message: "Lay thong tin thanh cong",
       data: user,
     });
   } catch (err) {
     console.error("Get me error:", err);
     return res.status(500).json({
       code: "server_error",
-      message: "Có lỗi xảy ra, vui lòng thử lại sau",
+      message: "Co loi xay ra, vui long thu lai sau",
     });
   }
 };

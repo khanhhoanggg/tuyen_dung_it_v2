@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../services/auth.service";
 
-// Mở rộng trực tiếp kiểu Request gốc của Express toàn cục (Global)
 declare global {
   namespace Express {
     interface Request {
@@ -15,7 +14,6 @@ declare global {
   }
 }
 
-// Thay thế AuthRequest bằng Request chuẩn của Express
 export const requireAuth = (
   req: Request,
   res: Response,
@@ -26,7 +24,7 @@ export const requireAuth = (
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({
       code: "unauthorized",
-      message: "Bạn cần đăng nhập để thực hiện thao tác này",
+      message: "Ban can dang nhap de thuc hien thao tac nay",
     });
   }
 
@@ -34,12 +32,12 @@ export const requireAuth = (
 
   try {
     const payload = verifyAccessToken(token);
-    req.user = payload; // OK! TypeScript đã hiểu req.user mà không cần ép kiểu
+    req.user = payload;
     next();
   } catch (error) {
     return res.status(401).json({
       code: "invalid_token",
-      message: "Phiên đăng nhập đã hết hạn hoặc không hợp lệ",
+      message: "Phien dang nhap da het han hoac khong hop le",
     });
   }
 };
@@ -49,14 +47,14 @@ export const requireRole = (...allowedRoles: string[]) => {
     if (!req.user) {
       return res.status(401).json({
         code: "unauthorized",
-        message: "Bạn cần đăng nhập để thực hiện thao tác này",
+        message: "Ban can dang nhap de thuc hien thao tac nay",
       });
     }
 
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).json({
         code: "forbidden",
-        message: "Bạn không có quyền thực hiện thao tác này",
+        message: "Ban khong co quyen thuc hien thao tac nay",
       });
     }
 
