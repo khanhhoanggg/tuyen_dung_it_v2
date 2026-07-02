@@ -26,46 +26,66 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           DevJobs Vietnam
         </Link>
         <Link className="ghost-button" href="/">
-          Quay lai
+          ← Quay lại
         </Link>
       </header>
+
       <section className="job-detail-hero">
         <p className="eyebrow">{job.company}</p>
         <h1>{job.title}</h1>
         <div className="job-meta detail">
-          <span>{job.location}</span>
-          <span>{job.salary}</span>
-          <span>{job.level}</span>
-          <span>{job.type}</span>
+          <span>📍 {job.location}</span>
+          <span>💰 {job.salary}</span>
+          <span>🧑‍💻 {job.level}</span>
+          <span>🕒 {job.type}</span>
         </div>
         <div className="tag-row">
           {job.skills.map((skill) => (
-            <span key={skill}>{skill}</span>
+            <span key={skill} className="skill-tag">
+              {skill}
+            </span>
           ))}
         </div>
       </section>
+
       <section className="detail-grid">
-        <article>
-          <h2>Mo ta cong viec</h2>
-          <p>{job.summary}</p>
-          <h2>Trach nhiem</h2>
-          <ul>
-            {job.responsibilities.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-          <h2>Yeu cau</h2>
-          <ul>
-            {job.requirements.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
+        <article className="job-content">
+          <div className="content-block">
+            <h2>Mô tả công việc</h2>
+            <p>{job.summary}</p>
+          </div>
+
+          <div className="content-block">
+            <h2>Trách nhiệm</h2>
+            <ul>
+              {job.responsibilities.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="content-block">
+            <h2>Yêu cầu</h2>
+            <ul>
+              {job.requirements.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
         </article>
+
         <aside className="apply-panel">
-          <h2>Ung tuyen vi tri nay</h2>
-          <p>Gui ho so cua ban den nha tuyen dung va theo doi trang thai trong dashboard.</p>
-          <button type="button">Ung tuyen ngay</button>
-          <Link href="/register">Tao ho so ung vien</Link>
+          <h2>Ứng tuyển vị trí này</h2>
+          <p>
+            Gửi hồ sơ của bạn đến nhà tuyển dụng và theo dõi trạng thái ứng
+            tuyển trong dashboard cá nhân.
+          </p>
+          <button type="button" className="primary-button">
+            Ứng tuyển ngay
+          </button>
+          <Link href="/register" className="secondary-link">
+            Tạo hồ sơ ứng viên
+          </Link>
         </aside>
       </section>
     </main>

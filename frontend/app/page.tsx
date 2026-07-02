@@ -11,17 +11,17 @@ export default function Home() {
           <span className="brand-mark">DJ</span>
           DevJobs Vietnam
         </Link>
-        <nav className="nav-links" aria-label="Dieu huong chinh">
-          <a href="#jobs">Viec lam</a>
-          <a href="#companies">Cong ty</a>
+        <nav className="nav-links" aria-label="Điều hướng chính">
+          <a href="#jobs">Việc làm</a>
+          <a href="#companies">Công ty</a>
           <Link href="/dashboard">Dashboard</Link>
         </nav>
         <div className="header-actions">
           <Link className="ghost-button" href="/login">
-            Dang nhap
+            Đăng nhập
           </Link>
           <Link className="primary-button" href="/register">
-            Dang ky
+            Đăng ký
           </Link>
         </div>
       </header>
@@ -29,32 +29,33 @@ export default function Home() {
       <section className="hero">
         <div className="hero-media" aria-hidden="true" />
         <div className="hero-content">
-          <p className="eyebrow">Tuyen dung IT tap trung vao chat luong</p>
-          <h1>Tim viec cong nghe phu hop voi nang luc va toc do phat trien cua ban.</h1>
+          <p className="eyebrow">Tuyển dụng IT tập trung vào chất lượng</p>
+          <h1>Tìm việc công nghệ phù hợp với năng lực và tốc độ phát triển của bạn.</h1>
           <p className="hero-copy">
-            Kham pha viec lam IT da duoc sap xep theo stack, muc luong, hinh thuc lam viec va do phu hop voi ho so.
+            Khám phá việc làm IT đã được sắp xếp theo stack, mức lương, hình
+            thức làm việc và độ phù hợp với hồ sơ.
           </p>
           <form className="search-panel">
             <label>
-              <span>Tu khoa</span>
+              <span>Từ khóa</span>
               <input placeholder="Frontend, Backend, DevOps..." />
             </label>
             <label>
-              <span>Dia diem</span>
+              <span>Địa điểm</span>
               <select defaultValue="all">
-                <option value="all">Tat ca</option>
-                <option>Ha Noi</option>
-                <option>Ho Chi Minh</option>
-                <option>Da Nang</option>
+                <option value="all">Tất cả</option>
+                <option>Hà Nội</option>
+                <option>Hồ Chí Minh</option>
+                <option>Đà Nẵng</option>
                 <option>Remote</option>
               </select>
             </label>
-            <button type="submit">Tim viec</button>
+            <button type="submit">Tìm việc</button>
           </form>
         </div>
       </section>
 
-      <section className="stats-band" aria-label="Thong ke nen tang">
+      <section className="stats-band" aria-label="Thống kê nền tảng">
         {stats.map((item) => (
           <div key={item.label}>
             <strong>{item.value}</strong>
@@ -66,10 +67,10 @@ export default function Home() {
       <section className="section" id="jobs">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Viec lam noi bat</p>
-            <h2>Co hoi dang tuyen hom nay</h2>
+            <p className="eyebrow">Việc làm nổi bật</p>
+            <h2>Cơ hội đang tuyển hôm nay</h2>
           </div>
-          <div className="filter-row" aria-label="Loc ky nang">
+          <div className="filter-row" aria-label="Lọc kỹ năng">
             {skillFilters.map((skill) => (
               <button key={skill} type="button">
                 {skill}
@@ -100,8 +101,8 @@ export default function Home() {
                 ))}
               </div>
               <div className="job-actions">
-                <Link href={`/jobs/${job.id}`}>Xem chi tiet</Link>
-                <button type="button">Luu viec</button>
+                <Link href={`/jobs/${job.id}`}>Xem chi tiết</Link>
+                <button type="button">Lưu việc</button>
               </div>
             </article>
           ))}
@@ -111,11 +112,11 @@ export default function Home() {
       <section className="section company-section" id="companies">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Nha tuyen dung</p>
-            <h2>Cong ty dang mo rong doi ngu IT</h2>
+            <p className="eyebrow">Nhà tuyển dụng</p>
+            <h2>Công ty đang mở rộng đội ngũ IT</h2>
           </div>
           <Link className="text-link" href="/dashboard">
-            Dang tin tuyen dung
+            Đăng tin tuyển dụng
           </Link>
         </div>
         <div className="company-grid">
@@ -124,7 +125,7 @@ export default function Home() {
               <div className="company-logo">{company.initials}</div>
               <h3>{company.name}</h3>
               <p>{company.description}</p>
-              <span>{company.openings} vi tri dang tuyen</span>
+              <span>{company.openings} vị trí đang tuyển</span>
             </article>
           ))}
         </div>

@@ -2,10 +2,10 @@ import Link from "next/link";
 import { jobs } from "@/data/jobs";
 
 const pipeline = [
-  { label: "Ho so moi", value: 18 },
-  { label: "Dang phong van", value: 7 },
-  { label: "Da gui offer", value: 3 },
-  { label: "Cho phan hoi", value: 11 },
+  { label: "Hồ sơ mới", value: 18 },
+  { label: "Đang phỏng vấn", value: 7 },
+  { label: "Đã gửi offer", value: 3 },
+  { label: "Chờ phản hồi", value: 11 },
 ];
 
 export default function DashboardPage() {
@@ -17,20 +17,26 @@ export default function DashboardPage() {
           DevJobs
         </Link>
         <nav>
-          <a className="active" href="#overview">Tong quan</a>
-          <a href="#jobs">Tin dang</a>
-          <a href="#candidates">Ung vien</a>
-          <a href="#settings">Cai dat</a>
+          <a className="active" href="#overview">
+            Tổng quan
+          </a>
+          <a href="#jobs">Tin đăng</a>
+          <a href="#candidates">Ứng viên</a>
+          <a href="#settings">Cài đặt</a>
         </nav>
       </aside>
+
       <section className="dashboard-content">
         <div className="dashboard-top">
           <div>
-            <p className="eyebrow">Dashboard nha tuyen dung</p>
-            <h1>Quan ly tin tuyen dung va pipeline ung vien</h1>
+            <p className="eyebrow">Dashboard nhà tuyển dụng</p>
+            <h1>Quản lý tin tuyển dụng và pipeline ứng viên</h1>
           </div>
-          <button type="button">Dang tin moi</button>
+          <button type="button" className="primary-button">
+            Đăng tin mới
+          </button>
         </div>
+
         <div className="metric-grid">
           {pipeline.map((item) => (
             <article className="metric-card" key={item.label}>
@@ -39,9 +45,10 @@ export default function DashboardPage() {
             </article>
           ))}
         </div>
+
         <section className="dashboard-panel" id="jobs">
           <div className="panel-heading">
-            <h2>Tin dang gan day</h2>
+            <h2>Tin đăng gần đây</h2>
             <Link href="/">Xem website</Link>
           </div>
           <div className="table-like">
@@ -49,10 +56,14 @@ export default function DashboardPage() {
               <div className="table-row" key={job.id}>
                 <div>
                   <strong>{job.title}</strong>
-                  <span>{job.location} - {job.type}</span>
+                  <span>
+                    {job.location} - {job.type}
+                  </span>
                 </div>
                 <span>{job.salary}</span>
-                <button type="button">Sua</button>
+                <button type="button" className="secondary-button">
+                  Sửa
+                </button>
               </div>
             ))}
           </div>

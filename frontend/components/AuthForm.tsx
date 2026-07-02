@@ -25,10 +25,10 @@ export function AuthForm({ mode }: AuthFormProps) {
         password: String(form.get("password") || ""),
       });
       setStatus("success");
-      setMessage(mode === "login" ? "Dang nhap thanh cong." : "Dang ky tai khoan thanh cong.");
+      setMessage(mode === "login" ? "Đăng nhập thành công." : "Đăng ký tài khoản thành công.");
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Da co loi xay ra.");
+      setMessage(error instanceof Error ? error.message : "Đã có lỗi xảy ra.");
     }
   }
 
@@ -42,18 +42,23 @@ export function AuthForm({ mode }: AuthFormProps) {
       </Link>
       <div className="auth-layout">
         <div className="auth-copy">
-          <p className="eyebrow">{isRegister ? "Bat dau ho so moi" : "Tro lai lam viec"}</p>
-          <h1>{isRegister ? "Tao tai khoan ung vien hoac nha tuyen dung." : "Dang nhap de quan ly ho so va viec da luu."}</h1>
+          <p className="eyebrow">{isRegister ? "Bắt đầu hồ sơ mới" : "Trở lại làm việc"}</p>
+          <h1>
+            {isRegister
+              ? "Tạo tài khoản ứng viên hoặc nhà tuyển dụng."
+              : "Đăng nhập để quản lý hồ sơ và việc đã lưu."}
+          </h1>
           <p>
-            Tai khoan giup ung vien theo doi viec da ung tuyen, con nha tuyen dung co the dang tin va quan ly pipeline.
+            Tài khoản giúp ứng viên theo dõi việc đã ứng tuyển, còn nhà tuyển
+            dụng có thể đăng tin và quản lý pipeline.
           </p>
         </div>
         <form className="auth-form" onSubmit={handleSubmit}>
-          <h2>{isRegister ? "Dang ky" : "Dang nhap"}</h2>
+          <h2>{isRegister ? "Đăng ký" : "Đăng nhập"}</h2>
           {isRegister && (
             <label>
-              Ho ten
-              <input name="fullName" placeholder="Nguyen Van A" required minLength={5} />
+              Họ tên
+              <input name="fullName" placeholder="Nguyễn Văn A" required minLength={5} />
             </label>
           )}
           <label>
@@ -61,16 +66,18 @@ export function AuthForm({ mode }: AuthFormProps) {
             <input name="email" type="email" placeholder="you@example.com" required />
           </label>
           <label>
-            Mat khau
-            <input name="password" type="password" placeholder="Toi thieu 8 ky tu" required minLength={8} />
+            Mật khẩu
+            <input name="password" type="password" placeholder="Tối thiểu 8 ký tự" required minLength={8} />
           </label>
           <button type="submit" disabled={status === "loading"}>
-            {status === "loading" ? "Dang xu ly..." : isRegister ? "Tao tai khoan" : "Dang nhap"}
+            {status === "loading" ? "Đang xử lý..." : isRegister ? "Tạo tài khoản" : "Đăng nhập"}
           </button>
           {message && <p className={`form-message ${status}`}>{message}</p>}
           <p className="switch-auth">
-            {isRegister ? "Da co tai khoan?" : "Chua co tai khoan?"}{" "}
-            <Link href={isRegister ? "/login" : "/register"}>{isRegister ? "Dang nhap" : "Dang ky"}</Link>
+            {isRegister ? "Đã có tài khoản?" : "Chưa có tài khoản?"}{" "}
+            <Link href={isRegister ? "/login" : "/register"}>
+              {isRegister ? "Đăng nhập" : "Đăng ký"}
+            </Link>
           </p>
         </form>
       </div>
