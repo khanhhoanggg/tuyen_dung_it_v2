@@ -21,7 +21,7 @@ export const register = async (req: Request, res: Response) => {
       });
     }
 
-    const { fullName, email, password } = value;
+    const { fullName, email, password, role } = value;
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
@@ -36,6 +36,7 @@ export const register = async (req: Request, res: Response) => {
       fullName,
       email,
       password: hashedPassword,
+      role,
     });
 
     return res.status(201).json({
@@ -45,6 +46,7 @@ export const register = async (req: Request, res: Response) => {
         id: newUser._id,
         fullName: newUser.fullName,
         email: newUser.email,
+        role: newUser.role,
       },
     });
   } catch (err) {

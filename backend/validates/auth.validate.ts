@@ -20,6 +20,9 @@ export const registerSchema = Joi.object({
         "Mat khau phai gom chu hoa, chu thuong, so va ky tu dac biet",
       "string.empty": "Mat khau khong duoc de trong",
     }),
+  role: Joi.string().valid("candidate", "company").default("candidate").messages({
+    "any.only": "Vai tro khong hop le",
+  }),
 });
 
 export const loginSchema = Joi.object({

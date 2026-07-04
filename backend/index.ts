@@ -8,6 +8,9 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { connectDatabase } from "./config/database";
 import authRoutes from "./routes/auth.route";
+import jobRoutes from "./routes/job.route";
+import applicationRoutes from "./routes/application.route";
+import savedJobRoutes from "./routes/savedJob.route";
 
 dotenv.config();
 
@@ -23,6 +26,9 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/jobs", jobRoutes);
+app.use("/api/applications", applicationRoutes);
+app.use("/api/saved-jobs", savedJobRoutes);
 
 const startServer = async () => {
   await connectDatabase();
