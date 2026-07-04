@@ -2,15 +2,18 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { authRequest } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { login, register, type Role } from "@/lib/api";
 
 type AuthFormProps = {
   mode: "login" | "register";
 };
 
 export function AuthForm({ mode }: AuthFormProps) {
+  const router = useRouter();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [role, setRole] = useState<Role>("candidate");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -19,13 +22,26 @@ export function AuthForm({ mode }: AuthFormProps) {
     setMessage("");
 
     try {
-      await authRequest(mode === "login" ? "/api/auth/login" : "/api/auth/register", {
-        fullName: String(form.get("fullName") || ""),
-        email: String(form.get("email") || ""),
-        password: String(form.get("password") || ""),
-      });
-      setStatus("success");
-      setMessage(mode === "login" ? "Đăng nhập thành công." : "Đăng ký tài khoản thành công.");
+      if (mode === "login") {
+        const result = await login({
+          email: String(form.get("email") || ""),
+          password: String(form.get("password") || ""),
+        });
+        setStatus("success");
+        setMessage("Đăng nhập thành công.");
+        router.push(result.user.role === "company" ? "/dashboard" : "/");
+        router.refresh();
+      } else {
+        await register({
+          fullName: String(form.get("fullName") || ""),
+          email: String(form.get("email") || ""),
+          password: String(form.get("password") || ""),
+          role,
+        });
+        setStatus("success");
+        setMessage("Đăng ký tài khoản thành công. Bạn có thể đăng nhập ngay.");
+        setTimeout(() => router.push("/login"), 1000);
+      }
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : "Đã có lỗi xảy ra.");
@@ -69,6 +85,31 @@ export function AuthForm({ mode }: AuthFormProps) {
             Mật khẩu
             <input name="password" type="password" placeholder="Tối thiểu 8 ký tự" required minLength={8} />
           </label>
+          {isRegister && (
+            <div className="role-select">
+              <span>Bạn là</span>
+              <label className="role-option">
+                <input
+                  type="radio"
+                  name="role"
+                  value="candidate"
+                  checked={role === "candidate"}
+                  onChange={() => setRole("candidate")}
+                />
+                Ứng viên
+              </label>
+              <label className="role-option">
+                <input
+                  type="radio"
+                  name="role"
+                  value="company"
+                  checked={role === "company"}
+                  onChange={() => setRole("company")}
+                />
+                Nhà tuyển dụng
+              </label>
+            </div>
+          )}
           <button type="submit" disabled={status === "loading"}>
             {status === "loading" ? "Đang xử lý..." : isRegister ? "Tạo tài khoản" : "Đăng nhập"}
           </button>

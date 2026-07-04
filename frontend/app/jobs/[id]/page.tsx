@@ -1,18 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { jobs } from "@/data/jobs";
+import { AccountNav } from "@/components/AccountNav";
+import { ApplyPanel } from "@/components/ApplyPanel";
+import { getJob } from "@/lib/api";
 
 type JobDetailPageProps = {
   params: Promise<{ id: string }>;
 };
 
-export function generateStaticParams() {
-  return jobs.map((job) => ({ id: job.id }));
-}
-
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { id } = await params;
-  const job = jobs.find((item) => item.id === id);
+
+  const job = await getJob(id).catch(() => null);
 
   if (!job) {
     notFound();
@@ -25,9 +24,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           <span className="brand-mark">DJ</span>
           DevJobs Vietnam
         </Link>
-        <Link className="ghost-button" href="/">
-          ← Quay lại
-        </Link>
+        <AccountNav />
       </header>
 
       <section className="job-detail-hero">
@@ -74,19 +71,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           </div>
         </article>
 
-        <aside className="apply-panel">
-          <h2>Ứng tuyển vị trí này</h2>
-          <p>
-            Gửi hồ sơ của bạn đến nhà tuyển dụng và theo dõi trạng thái ứng
-            tuyển trong dashboard cá nhân.
-          </p>
-          <button type="button" className="primary-button">
-            Ứng tuyển ngay
-          </button>
-          <Link href="/register" className="secondary-link">
-            Tạo hồ sơ ứng viên
-          </Link>
-        </aside>
+        <ApplyPanel jobId={job._id} />
       </section>
     </main>
   );
