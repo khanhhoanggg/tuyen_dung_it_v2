@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getMyApplications,
   updateApplicationStatus,
+  updateApplicationAts, // moi them
   getCompanyStats,
 } from "../controllers/application.controller";
 import { requireAuth, requireRole } from "../middlewares/auth.middleware";
@@ -15,6 +16,12 @@ router.patch(
   requireAuth,
   requireRole("company", "admin"),
   updateApplicationStatus
+);
+router.patch(
+  "/:id/ats",
+  requireAuth,
+  requireRole("company", "admin"),
+  updateApplicationAts
 );
 
 export default router;

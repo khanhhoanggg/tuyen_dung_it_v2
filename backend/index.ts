@@ -18,6 +18,9 @@ import companyProfileRoutes from "./routes/companyProfile.route";
 import companyLocationRoutes from "./routes/companyLocation.route";
 import vietnamLocationRoutes from "./routes/vietnamLocation.route";
 import jobInvitationRoutes from "./routes/jobInvitation.route";
+import interviewScheduleRoutes from "./routes/interviewSchedule.route";
+import offerRoutes from "./routes/offer.route";
+import messageRoutes from "./routes/message.route";
 
 dotenv.config();
 
@@ -43,6 +46,9 @@ app.use("/api/company-profile", companyProfileRoutes);
 app.use("/api/company-locations", companyLocationRoutes);
 app.use("/api/vietnam-locations", vietnamLocationRoutes);
 app.use("/api/invitations", jobInvitationRoutes);
+app.use("/api", interviewScheduleRoutes);
+app.use("/api", offerRoutes);
+app.use("/api", messageRoutes);
 
 const startServer = async () => {
   await connectDatabase();

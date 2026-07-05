@@ -7,6 +7,9 @@ export interface IApplication extends Document {
   candidate: Types.ObjectId;
   status: ApplicationStatus;
   message?: string;
+  rating?: number;
+  internalNote?: string;
+  tags: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +24,10 @@ const applicationSchema = new Schema<IApplication>(
       default: "new",
     },
     message: { type: String, trim: true, maxlength: 2000 },
+    // ATS/CRM: cong ty danh gia + ghi chu noi bo, khong hien thi cho ung vien
+    rating: { type: Number, min: 1, max: 5 },
+    internalNote: { type: String, trim: true, maxlength: 3000 },
+    tags: { type: [String], default: [] },
   },
   { timestamps: true }
 );

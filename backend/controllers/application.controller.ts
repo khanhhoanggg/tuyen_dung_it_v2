@@ -4,6 +4,7 @@ import Application from "../models/application.model";
 import {
   createApplicationSchema,
   updateApplicationStatusSchema,
+  updateApplicationAtsSchema
 } from "../validates/application.validate";
 
 export const applyToJob = async (req: Request, res: Response) => {
@@ -63,9 +64,9 @@ export const applyToJob = async (req: Request, res: Response) => {
 export const getMyApplications = async (req: Request, res: Response) => {
   try {
     const applications = await Application.find({ candidate: req.user!.sub })
+      .select("-rating -internalNote -tags")
       .populate("job")
       .sort({ createdAt: -1 });
-
     return res.status(200).json({
       code: "success",
       message: "Lay danh sach ung tuyen thanh cong",
@@ -195,6 +196,57 @@ export const getCompanyStats = async (req: Request, res: Response) => {
     });
   } catch (err) {
     console.error("Get company stats error:", err);
+    return res.status(500).json({
+      code: "server_error",
+      message: "Co loi xay ra, vui long thu lai sau",
+    });
+  }
+};
+// Cong ty cap nhat rating / note noi bo / tag cho 1 don ung tuyen - PATCH /api/applications/:id/ats
+export const updateApplicationAts = async (req: Request, res: Response) => {
+  try {
+    const { error, value } = updateApplicationAtsSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      return res.status(400).json({
+        code: "validation_error",
+        message: error.details.map((detail) => detail.message),
+      });
+    }
+
+    const application = await Application.findById(req.params.id).populate("job");
+
+    if (!application) {
+      return res.status(404).json({
+        code: "not_found",
+        message: "Khong tim thay don ung tuyen",
+      });
+    }
+
+    const job = application.job as any;
+
+    if (String(job.postedBy) !== req.user!.sub && req.user!.role !== "admin") {
+      return res.status(403).json({
+        code: "forbidden",
+        message: "Ban khong co quyen cap nhat don ung tuyen nay",
+      });
+    }
+
+    if (value.rating !== undefined) application.rating = value.rating;
+    if (value.internalNote !== undefined) application.internalNote = value.internalNote;
+    if (value.tags !== undefined) application.tags = value.tags;
+
+    await application.save();
+
+    return res.status(200).json({
+      code: "success",
+      message: "Cap nhat danh gia ung vien thanh cong",
+      data: application,
+    });
+  } catch (err) {
+    console.error("Update application ATS error:", err);
     return res.status(500).json({
       code: "server_error",
       message: "Co loi xay ra, vui long thu lai sau",

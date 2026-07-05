@@ -13,3 +13,8 @@ export const updateApplicationStatusSchema = Joi.object({
       "string.empty": "Trang thai khong duoc de trong",
     }),
 });
+export const updateApplicationAtsSchema = Joi.object({
+  rating: Joi.number().integer().min(1).max(5),
+  internalNote: Joi.string().allow("").max(3000),
+  tags: Joi.array().items(Joi.string().trim().max(30)).max(20),
+}).min(1);

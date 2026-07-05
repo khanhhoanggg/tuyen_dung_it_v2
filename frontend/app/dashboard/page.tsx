@@ -60,6 +60,7 @@ export default function DashboardPage() {
 
 // ---------- Dashboard cho ứng viên ----------
 
+
 function CandidateDashboard({ user }: { user: User }) {
   const [applications, setApplications] = useState<Application[]>([]);
   const [savedJobs, setSavedJobs] = useState<SavedJob[]>([]);
@@ -238,9 +239,11 @@ function CompanyDashboard({ user }: { user: User }) {
         </Link>
         <nav>
           <a className="active" href="#overview">
-            Tổng quan
+          Tổng quan
           </a>
           <a href="#jobs">Tin đăng</a>
+          <Link href="/dashboard/company-profile">Hồ sơ công ty</Link>
+          <Link href="/dashboard/company-locations">Địa điểm làm việc</Link>
         </nav>
       </aside>
 

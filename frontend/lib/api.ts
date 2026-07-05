@@ -448,3 +448,43 @@ export async function updateMyCandidatePreference(
     body: JSON.stringify(payload),
   });
 }
+// ---------- Company profile ----------
+
+export type CompanySize = "1-10" | "11-50" | "51-200" | "201-500" | "500+";
+
+export type CompanyProfile = {
+  _id: string;
+  user: string;
+  companyName: string;
+  logoUrl?: string;
+  website?: string;
+  industry?: string;
+  companySize?: CompanySize;
+  description?: string;
+  foundedYear?: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CompanyProfileInput = {
+  companyName: string;
+  logoUrl?: string;
+  website?: string;
+  industry?: string;
+  companySize?: CompanySize;
+  description?: string;
+  foundedYear?: number;
+};
+
+export async function getMyCompanyProfile(): Promise<CompanyProfile | null> {
+  return request<CompanyProfile | null>("/api/company-profile/me");
+}
+
+export async function updateMyCompanyProfile(
+  payload: CompanyProfileInput
+): Promise<CompanyProfile> {
+  return request<CompanyProfile>("/api/company-profile/me", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
