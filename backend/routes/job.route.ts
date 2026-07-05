@@ -8,8 +8,9 @@ import {
   deleteJob,
 } from "../controllers/job.controller";
 import { applyToJob, getJobApplications } from "../controllers/application.controller";
-import { saveJob, unsaveJob } from "../controllers/savedJob.controller";
+import { saveJob, unsaveJob, trackViewJob } from "../controllers/candidateJobActivity.controller";
 import { requireAuth, requireRole } from "../middlewares/auth.middleware";
+import { inviteCandidate, listJobInvitations } from "../controllers/jobInvitation.controller";
 
 const router = Router();
 
@@ -31,5 +32,8 @@ router.get(
 
 router.post("/:jobId/save", requireAuth, requireRole("candidate"), saveJob);
 router.delete("/:jobId/save", requireAuth, requireRole("candidate"), unsaveJob);
+router.post("/:jobId/view", requireAuth, requireRole("candidate"), trackViewJob);
+router.post("/:jobId/invitations", requireAuth, requireRole("company"), inviteCandidate);
+router.get("/:jobId/invitations", requireAuth, requireRole("company"), listJobInvitations);
 
 export default router;

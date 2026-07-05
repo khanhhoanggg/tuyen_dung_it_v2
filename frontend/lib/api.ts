@@ -317,6 +317,134 @@ export async function unsaveJob(jobId: string): Promise<void> {
 }
 
 export async function listSavedJobs(): Promise<SavedJob[]> {
-  const result = await request<SavedJob[]>("/api/saved-jobs");
+  const result = await request<SavedJob[]>("/api/job-activities/saved");
   return result || [];
+}
+// ---------- Candidate profile ----------
+
+export type Experience = {
+  company: string;
+  position: string;
+  startDate: string;
+  endDate?: string;
+  description?: string;
+};
+
+export type Education = {
+  school: string;
+  major: string;
+  startDate: string;
+  endDate?: string;
+};
+
+export type CandidateProfile = {
+  _id: string;
+  user: string;
+  avatarUrl?: string;
+  phone?: string;
+  headline?: string;
+  bio?: string;
+  skills: string[];
+  experiences: Experience[];
+  educations: Education[];
+  cvUrl?: string;
+  cvOriginalName?: string;
+  cvUploadedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CandidateProfileInput = {
+  avatarUrl?: string;
+  phone?: string;
+  headline?: string;
+  bio?: string;
+  skills: string[];
+  experiences: Experience[];
+  educations: Education[];
+};
+
+export async function getMyCandidateProfile(): Promise<CandidateProfile | null> {
+  return request<CandidateProfile | null>("/api/candidate-profile/me");
+}
+
+export async function updateMyCandidateProfile(
+  payload: CandidateProfileInput
+): Promise<CandidateProfile> {
+  return request<CandidateProfile>("/api/candidate-profile/me", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function uploadMyCv(file: File): Promise<CandidateProfile> {
+  const formData = new FormData();
+  formData.append("cv", file);
+
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}/api/candidate-profile/me/cv`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  let data: ApiResponse<CandidateProfile>;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Không thể kết nối đến server. Vui lòng thử lại sau.");
+  }
+
+  if (!response.ok) {
+    const errorMessage = Array.isArray(data.message)
+      ? data.message.join(", ")
+      : data.message || "Không thể upload CV";
+    throw new Error(errorMessage);
+  }
+
+  return data.data as CandidateProfile;
+}
+
+// ---------- Candidate preference ----------
+
+export type CandidatePreference = {
+  _id: string;
+  user: string;
+  desiredSkills: string[];
+  desiredLocations: string[];
+  desiredLevel?: Job["level"];
+  desiredType?: Job["type"];
+  minSalary?: number;
+  maxSalary?: number;
+  isOpenToWork: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CandidatePreferenceInput = {
+  desiredSkills: string[];
+  desiredLocations: string[];
+  desiredLevel?: Job["level"];
+  desiredType?: Job["type"];
+  minSalary?: number;
+  maxSalary?: number;
+  isOpenToWork: boolean;
+};
+
+export async function getMyCandidatePreference(): Promise<CandidatePreference | null> {
+  return request<CandidatePreference | null>("/api/candidate-preference/me");
+}
+
+export async function updateMyCandidatePreference(
+  payload: CandidatePreferenceInput
+): Promise<CandidatePreference> {
+  return request<CandidatePreference>("/api/candidate-preference/me", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
 }

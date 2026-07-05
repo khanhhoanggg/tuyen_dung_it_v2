@@ -106,6 +106,8 @@ function CandidateDashboard({ user }: { user: User }) {
             Đơn ứng tuyển
           </a>
           <a href="#saved">Việc đã lưu</a>
+          <Link href="/dashboard/profile">Hồ sơ của tôi</Link>
+          <Link href="/dashboard/preferences">Tiêu chí việc làm</Link>
         </nav>
       </aside>
 
