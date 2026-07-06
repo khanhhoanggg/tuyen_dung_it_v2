@@ -96,3 +96,27 @@ export const uploadMyCv = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getCandidateProfileById = async (req: Request, res: Response) => {
+  try {
+    const profile = await CandidateProfile.findOne({ user: req.params.userId });
+    if (!profile) {
+      return res.status(200).json({
+        code: "success",
+        message: "Ứng viên chưa tạo hồ sơ chi tiết",
+        data: null,
+      });
+    }
+    return res.status(200).json({
+      code: "success",
+      message: "Lay ho so thanh cong",
+      data: profile,
+    });
+  } catch (err) {
+    console.error("Get candidate profile by id error:", err);
+    return res.status(500).json({
+      code: "server_error",
+      message: "Co loi xay ra, vui long thu lai sau",
+    });
+  }
+};

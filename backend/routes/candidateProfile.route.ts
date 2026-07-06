@@ -3,6 +3,7 @@ import {
   getMyProfile,
   upsertMyProfile,
   uploadMyCv,
+  getCandidateProfileById,
 } from "../controllers/candidateProfile.controller";
 import { requireAuth, requireRole } from "../middlewares/auth.middleware";
 import { uploadCv } from "../middlewares/upload.middleware";
@@ -18,5 +19,6 @@ router.post(
   uploadCv.single("cv"), // "cv" là tên field trong form-data khi frontend gửi lên
   uploadMyCv
 );
+router.get("/:userId", requireAuth, requireRole("company", "admin"), getCandidateProfileById);
 
 export default router;

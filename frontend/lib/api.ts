@@ -536,3 +536,236 @@ export async function addMyCompanyLocation(
 export async function deleteMyCompanyLocation(id: string): Promise<void> {
   await request<void>(`/api/company-locations/mine/${id}`, { method: "DELETE" });
 }
+
+// ---------- PHỎNG VẤN (INTERVIEWS) ----------
+export type InterviewType = "onsite" | "online";
+
+export type InterviewSchedule = {
+  _id: string;
+  job: Job | string;
+  application: string;
+  candidate: User | string;
+  company: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  type: InterviewType;
+  meetingLink?: string;
+  address?: string;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type InterviewInput = {
+  scheduledAt: string;
+  durationMinutes: number;
+  type: InterviewType;
+  meetingLink?: string;
+  address?: string;
+  note?: string;
+};
+
+export async function createInterview(
+  applicationId: string,
+  payload: InterviewInput
+): Promise<InterviewSchedule> {
+  return request<InterviewSchedule>(`/api/applications/${applicationId}/interviews`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function listCompanyInterviews(): Promise<InterviewSchedule[]> {
+  const result = await request<InterviewSchedule[]>("/api/interviews/company/mine");
+  return result || [];
+}
+
+export async function listMyInterviews(): Promise<InterviewSchedule[]> {
+  const result = await request<InterviewSchedule[]>("/api/interviews/mine");
+  return result || [];
+}
+
+export async function updateInterview(
+  id: string,
+  payload: Partial<InterviewInput>
+): Promise<InterviewSchedule> {
+  return request<InterviewSchedule>(`/api/interviews/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+// ---------- THƯ MỜI NHẬN VIỆC (OFFERS) ----------
+export type OfferStatus = "draft" | "sent" | "accepted" | "declined" | "withdrawn";
+
+export type Offer = {
+  _id: string;
+  job: Job | string;
+  application: string;
+  candidate: User | string;
+  company: string;
+  position: string;
+  salary: string;
+  startDate: string;
+  content?: string;
+  status: OfferStatus;
+  candidateSignature?: string;
+  signedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type OfferInput = {
+  position: string;
+  salary: string;
+  startDate: string;
+  content?: string;
+  status: "draft" | "sent";
+};
+
+export async function createOffer(
+  applicationId: string,
+  payload: OfferInput
+): Promise<Offer> {
+  return request<Offer>(`/api/applications/${applicationId}/offers`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function listCompanyOffers(): Promise<Offer[]> {
+  const result = await request<Offer[]>("/api/offers/company/mine");
+  return result || [];
+}
+
+export async function listMyOffers(): Promise<Offer[]> {
+  const result = await request<Offer[]>("/api/offers/mine");
+  return result || [];
+}
+
+export async function getOffer(id: string): Promise<Offer> {
+  return request<Offer>(`/api/offers/${id}`);
+}
+
+export async function updateOffer(
+  id: string,
+  payload: Partial<OfferInput>
+): Promise<Offer> {
+  return request<Offer>(`/api/offers/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function sendOffer(id: string): Promise<Offer> {
+  return request<Offer>(`/api/offers/${id}/send`, { method: "PATCH" });
+}
+
+export async function withdrawOffer(id: string): Promise<Offer> {
+  return request<Offer>(`/api/offers/${id}/withdraw`, { method: "PATCH" });
+}
+
+export async function signOffer(
+  id: string,
+  candidateSignature: string
+): Promise<Offer> {
+  return request<Offer>(`/api/offers/${id}/sign`, {
+    method: "PATCH",
+    body: JSON.stringify({ candidateSignature }),
+  });
+}
+
+export async function declineOffer(id: string): Promise<Offer> {
+  return request<Offer>(`/api/offers/${id}/decline`, { method: "PATCH" });
+}
+
+// ---------- TIN NHẮN (MESSAGES) ----------
+export type Message = {
+  _id: string;
+  application: string;
+  job: string;
+  sender: User | string;
+  recipient: User | string;
+  content: string;
+  readAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Conversation = {
+  _id: string; // applicationId
+  lastMessage: Message;
+  unreadCount: number;
+};
+
+export async function sendMessage(
+  applicationId: string,
+  content: string
+): Promise<Message> {
+  return request<Message>(`/api/applications/${applicationId}/messages`, {
+    method: "POST",
+    body: JSON.stringify({ content }),
+  });
+}
+
+export async function getConversation(
+  applicationId: string
+): Promise<Message[]> {
+  const result = await request<Message[]>(`/api/applications/${applicationId}/messages`);
+  return result || [];
+}
+
+export async function listCompanyConversations(): Promise<Conversation[]> {
+  const result = await request<Conversation[]>("/api/messages/company/conversations");
+  return result || [];
+}
+
+// ---------- LỜI MỜI TUYỂN DỤNG (JOB INVITATIONS) ----------
+export type InvitationStatus = "pending" | "accepted" | "declined";
+
+export type JobInvitation = {
+  _id: string;
+  job: Job;
+  invitedBy: string | User;
+  candidate: string | User;
+  message?: string;
+  status: InvitationStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export async function inviteCandidate(
+  jobId: string,
+  candidateEmail: string,
+  message?: string
+): Promise<JobInvitation> {
+  return request<JobInvitation>(`/api/jobs/${jobId}/invitations`, {
+    method: "POST",
+    body: JSON.stringify({ candidateEmail, message }),
+  });
+}
+
+export async function listJobInvitations(jobId: string): Promise<JobInvitation[]> {
+  const result = await request<JobInvitation[]>(`/api/jobs/${jobId}/invitations`);
+  return result || [];
+}
+
+export async function listMyInvitations(): Promise<JobInvitation[]> {
+  const result = await request<JobInvitation[]>("/api/invitations/mine");
+  return result || [];
+}
+
+export async function respondToInvitation(
+  id: string,
+  status: "accepted" | "declined"
+): Promise<JobInvitation> {
+  return request<JobInvitation>(`/api/invitations/${id}/respond`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
+}
+
+// ---------- HỒ SƠ ỨNG VIÊN CHO CÔNG TY (COMPANY VIEWING PROFILE) ----------
+export async function getCandidateProfile(userId: string): Promise<CandidateProfile | null> {
+  return request<CandidateProfile | null>(`/api/candidate-profile/${userId}`);
+}
