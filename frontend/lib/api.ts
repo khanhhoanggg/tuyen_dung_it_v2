@@ -488,3 +488,51 @@ export async function updateMyCompanyProfile(
     body: JSON.stringify(payload),
   });
 }
+// ---------- Vietnam locations (danh mục dùng chung) ----------
+
+export type VietnamLocation = {
+  _id: string;
+  name: string;
+  region: "Bac" | "Trung" | "Nam";
+};
+
+export async function listVietnamLocations(): Promise<VietnamLocation[]> {
+  const result = await request<VietnamLocation[]>("/api/vietnam-locations");
+  return result || [];
+}
+
+// ---------- Company locations ----------
+
+export type CompanyLocation = {
+  _id: string;
+  companyProfile: string;
+  vietnamLocation: VietnamLocation;
+  addressDetail?: string;
+  isHeadquarters: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CompanyLocationInput = {
+  vietnamLocation: string;
+  addressDetail?: string;
+  isHeadquarters: boolean;
+};
+
+export async function listMyCompanyLocations(): Promise<CompanyLocation[]> {
+  const result = await request<CompanyLocation[]>("/api/company-locations/mine");
+  return result || [];
+}
+
+export async function addMyCompanyLocation(
+  payload: CompanyLocationInput
+): Promise<CompanyLocation> {
+  return request<CompanyLocation>("/api/company-locations/mine", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteMyCompanyLocation(id: string): Promise<void> {
+  await request<void>(`/api/company-locations/mine/${id}`, { method: "DELETE" });
+}
