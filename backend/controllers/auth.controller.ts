@@ -1,12 +1,15 @@
 import { Request, Response } from "express";
 import User from "../models/user.model";
 import { registerSchema, loginSchema } from "../validates/auth.validate";
+import { sendVerificationEmail } from "../services/email.service";
 import {
   hashPassword,
   comparePassword,
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
+  generateEmailVerificationToken,
+  hashEmailVerificationToken,
 } from "../services/auth.service";
 
 export const register = async (req: Request, res: Response) => {
@@ -33,16 +36,27 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const hashedPassword = await hashPassword(password);
+    const { rawToken, hashedToken } = generateEmailVerificationToken();
+
     const newUser = await User.create({
       fullName,
       email,
       password: hashedPassword,
       role,
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
     });
+
+    try {
+      await sendVerificationEmail(newUser.email, rawToken);
+    } catch (mailErr) {
+      console.error("Send verification email error:", mailErr);
+      // Khong rollback user, chi log loi - user van co the request gui lai email sau
+    }
 
     return res.status(201).json({
       code: "success",
-      message: "Dang ky tai khoan thanh cong",
+      message: "Dang ky thanh cong, vui long kiem tra email de xac thuc tai khoan",
       data: {
         id: newUser._id,
         fullName: newUser.fullName,
@@ -235,6 +249,48 @@ export const logout = async (req: Request, res: Response) => {
     });
   } catch (err) {
     console.error("Logout error:", err);
+    return res.status(500).json({
+      code: "server_error",
+      message: "Co loi xay ra, vui long thu lai sau",
+    });
+  }
+};
+export const verifyEmail = async (req: Request, res: Response) => {
+  try {
+    const { token } = req.query;
+
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({
+        code: "missing_token",
+        message: "Thieu token xac thuc",
+      });
+    }
+
+    const hashedToken = hashEmailVerificationToken(token);
+
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpires: { $gt: new Date() },
+    }).select("+emailVerificationToken +emailVerificationExpires");
+
+    if (!user) {
+      return res.status(400).json({
+        code: "invalid_or_expired_token",
+        message: "Token khong hop le hoac da het han",
+      });
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    return res.status(200).json({
+      code: "success",
+      message: "Xac thuc email thanh cong",
+    });
+  } catch (err) {
+    console.error("Verify email error:", err);
     return res.status(500).json({
       code: "server_error",
       message: "Co loi xay ra, vui long thu lai sau",

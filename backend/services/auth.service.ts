@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt, { SignOptions } from "jsonwebtoken";
+import crypto from "crypto";
 
 const SALT_ROUNDS = 10;
 
@@ -62,4 +63,17 @@ export const verifyRefreshToken = (token: string) => {
   }
 
   return jwt.verify(token, secret) as AccessTokenPayload;
+};
+export const generateEmailVerificationToken = () => {
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(rawToken)
+    .digest("hex");
+
+  return { rawToken, hashedToken };
+};
+
+export const hashEmailVerificationToken = (rawToken: string) => {
+  return crypto.createHash("sha256").update(rawToken).digest("hex");
 };
