@@ -95,9 +95,36 @@ export function clearSession() {
 
 // ---------- Hàm gọi API dùng chung ----------
 
+let refreshingPromise: Promise<string | null> | null = null;
+
+async function tryRefreshToken(): Promise<string | null> {
+  if (!refreshingPromise) {
+    refreshingPromise = fetch(`${API_URL}/api/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+    })
+      .then(async (res) => {
+        if (!res.ok) return null;
+        const json = await res.json();
+        const newToken = json?.data?.accessToken as string | undefined;
+        if (newToken) {
+          localStorage.setItem(TOKEN_KEY, newToken);
+          return newToken;
+        }
+        return null;
+      })
+      .catch(() => null)
+      .finally(() => {
+        refreshingPromise = null;
+      });
+  }
+  return refreshingPromise;
+}
+
 async function request<T>(
   path: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  isRetry = false
 ): Promise<T> {
   const token = getToken();
 
@@ -113,7 +140,16 @@ async function request<T>(
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers,
+    credentials: "include",
   });
+
+  if (response.status === 401 && !isRetry && path !== "/api/auth/refresh") {
+    const newToken = await tryRefreshToken();
+    if (newToken) {
+      return request<T>(path, options, true);
+    }
+    clearSession();
+  }
 
   let data: ApiResponse<T>;
   try {
@@ -164,13 +200,19 @@ export async function register(payload: AuthPayload): Promise<User> {
     body: JSON.stringify(payload),
   });
 }
+export async function logout(): Promise<void> {
+  try {
+    await fetch(`${API_URL}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } finally {
+    clearSession();
+  }
+}
 
 export async function getMe(): Promise<User> {
   return request<User>("/api/auth/me");
-}
-
-export function logout() {
-  clearSession();
 }
 
 // ---------- Jobs ----------

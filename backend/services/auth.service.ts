@@ -54,3 +54,12 @@ export const verifyAccessToken = (token: string) => {
 
   return jwt.verify(token, secret) as AccessTokenPayload;
 };
+export const verifyRefreshToken = (token: string) => {
+  const secret = process.env.REFRESH_TOKEN_SECRET;
+
+  if (!secret) {
+    throw new Error("Missing REFRESH_TOKEN_SECRET in environment variables");
+  }
+
+  return jwt.verify(token, secret) as AccessTokenPayload;
+};

@@ -21,6 +21,9 @@ import jobInvitationRoutes from "./routes/jobInvitation.route";
 import interviewScheduleRoutes from "./routes/interviewSchedule.route";
 import offerRoutes from "./routes/offer.route";
 import messageRoutes from "./routes/message.route";
+import helmet from "helmet";
+import { sanitizeBody } from "./middlewares/sanitize.middleware";
+import { authRateLimiter } from "./middlewares/rateLimit.middleware";
 
 dotenv.config();
 
@@ -49,6 +52,9 @@ app.use("/api/invitations", jobInvitationRoutes);
 app.use("/api", interviewScheduleRoutes);
 app.use("/api", offerRoutes);
 app.use("/api", messageRoutes);
+app.use(helmet());
+app.use(express.json());
+app.use(sanitizeBody);
 
 const startServer = async () => {
   await connectDatabase();
