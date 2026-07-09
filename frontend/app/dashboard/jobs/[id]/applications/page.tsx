@@ -8,6 +8,7 @@ import {
   getJobApplications,
   getCandidateProfile,
   updateApplicationStatus,
+  updateApplicationAts,
   createInterview,
   listCompanyInterviews,
   createOffer,
@@ -29,7 +30,7 @@ type PageProps = {
   params: Promise<{ id: string }>;
 };
 
-type ActiveTab = "profile" | "interview" | "offer";
+type ActiveTab = "profile" | "interview" | "offer" | "ats";
 
 export default function JobApplicationsPage({ params }: PageProps) {
   const router = useRouter();
@@ -71,6 +72,13 @@ export default function JobApplicationsPage({ params }: PageProps) {
   const [offStartDate, setOffStartDate] = useState("");
   const [offContent, setOffContent] = useState("");
 
+  // Form ATS/CRM (đánh giá + ghi chú nội bộ)
+  const [atsRating, setAtsRating] = useState(0);
+  const [atsNote, setAtsNote] = useState("");
+  const [atsTags, setAtsTags] = useState<string[]>([]);
+  const [atsTagInput, setAtsTagInput] = useState("");
+  const [atsSaving, setAtsSaving] = useState(false);
+
   useEffect(() => {
     const stored = getStoredUser();
     if (!stored || stored.role !== "company") {
@@ -106,6 +114,11 @@ export default function JobApplicationsPage({ params }: PageProps) {
     setSelectedApp(app);
     setProfileLoading(true);
     setActiveTab("profile");
+    // Nạp lại form ATS theo ứng viên vừa chọn
+    setAtsRating(app.rating || 0);
+    setAtsNote(app.internalNote || "");
+    setAtsTags(app.tags || []);
+    setAtsTagInput("");
     try {
       const candidateId = typeof app.candidate === "string" ? app.candidate : ((app.candidate as any)._id || (app.candidate as any).id);
       const profile = await getCandidateProfile(candidateId);
@@ -127,6 +140,50 @@ export default function JobApplicationsPage({ params }: PageProps) {
       setSelectedApp((prev) => (prev ? { ...prev, status: updated.status } : null));
     } catch (err) {
       window.alert(err instanceof Error ? err.message : "Không thể đổi trạng thái");
+    }
+  }
+  
+  // Thêm 1 tag vào form ATS (Enter hoặc dấu phẩy)
+  function handleAddAtsTag(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== "Enter" && e.key !== ",") return;
+    e.preventDefault();
+    const value = atsTagInput.trim();
+    if (!value) return;
+    if (!atsTags.includes(value)) {
+      setAtsTags((prev) => [...prev, value]);
+    }
+    setAtsTagInput("");
+  }
+
+  function handleRemoveAtsTag(tag: string) {
+    setAtsTags((prev) => prev.filter((t) => t !== tag));
+  }
+
+  // Lưu đánh giá / ghi chú nội bộ / tag cho ứng viên
+  async function handleSaveAts() {
+    if (!selectedApp) return;
+    setAtsSaving(true);
+    try {
+      const updated = await updateApplicationAts(selectedApp._id, {
+        rating: atsRating || undefined,
+        internalNote: atsNote,
+        tags: atsTags,
+      });
+      setApps((prev) =>
+        prev.map((a) =>
+          a._id === updated._id
+            ? { ...a, rating: updated.rating, internalNote: updated.internalNote, tags: updated.tags }
+            : a
+        )
+      );
+      setSelectedApp((prev) =>
+        prev ? { ...prev, rating: updated.rating, internalNote: updated.internalNote, tags: updated.tags } : null
+      );
+      window.alert("Đã lưu đánh giá nội bộ!");
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Không thể lưu đánh giá");
+    } finally {
+      setAtsSaving(false);
     }
   }
 
@@ -327,6 +384,7 @@ export default function JobApplicationsPage({ params }: PageProps) {
 
             {/* Điều hướng các tab */}
             <div className="ats-tabs">
+              <button className={activeTab === "ats" ? "active" : ""} onClick={() => setActiveTab("ats")}>Đánh giá nội bộ</button>
               <button className={activeTab === "profile" ? "active" : ""} onClick={() => setActiveTab("profile")}>Hồ sơ ứng viên</button>
               <button className={activeTab === "interview" ? "active" : ""} onClick={() => setActiveTab("interview")}>Lịch phỏng vấn</button>
               <button className={activeTab === "offer" ? "active" : ""} onClick={() => setActiveTab("offer")}>Offer tuyển dụng</button>
@@ -561,6 +619,73 @@ export default function JobApplicationsPage({ params }: PageProps) {
                       <button type="submit" className="primary-button">Lưu bản nháp Offer</button>
                     </form>
                   )}
+                </div>
+              )}
+              {/* TAB 4: ĐÁNH GIÁ NỘI BỘ (ATS/CRM) */}
+              {activeTab === "ats" && (
+                <div className="ats-review-tab">
+                  <div className="ats-form">
+                    <h3>Đánh giá & ghi chú nội bộ</h3>
+                    <p className="form-message">Thông tin này chỉ nội bộ công ty xem được, ứng viên không thấy.</p>
+
+                    <label>
+                      Mức đánh giá:
+                      <div className="star-rating">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            type="button"
+                            key={star}
+                            className={`star ${star <= atsRating ? "filled" : ""}`}
+                            onClick={() => setAtsRating(star === atsRating ? 0 : star)}
+                            aria-label={`Đánh giá ${star} sao`}
+                          >
+                            ★
+                          </button>
+                        ))}
+                      </div>
+                    </label>
+
+                    <label>
+                      Ghi chú nội bộ:
+                      <textarea
+                        placeholder="Nhận xét về ứng viên (kỹ năng, thái độ phỏng vấn, mức lương thoả thuận nội bộ...)"
+                        value={atsNote}
+                        onChange={(e) => setAtsNote(e.target.value)}
+                        rows={5}
+                      />
+                    </label>
+
+                    <label>
+                      Gắn tag:
+                      <input
+                        type="text"
+                        placeholder="Nhập tag rồi nhấn Enter (VD: giỏi thuật toán, cần đào tạo thêm...)"
+                        value={atsTagInput}
+                        onChange={(e) => setAtsTagInput(e.target.value)}
+                        onKeyDown={handleAddAtsTag}
+                      />
+                    </label>
+                    <div className="ats-tag-list">
+                      {atsTags.length === 0 && <span className="form-message">Chưa có tag nào.</span>}
+                      {atsTags.map((tag) => (
+                        <span key={tag} className="ats-tag-chip">
+                          {tag}
+                          <button type="button" onClick={() => handleRemoveAtsTag(tag)} aria-label={`Xóa tag ${tag}`}>
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="primary-button"
+                      onClick={handleSaveAts}
+                      disabled={atsSaving}
+                    >
+                      {atsSaving ? "Đang lưu..." : "Lưu đánh giá"}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

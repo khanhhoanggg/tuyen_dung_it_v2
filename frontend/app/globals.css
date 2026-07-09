@@ -1008,6 +1008,57 @@ select:focus-visible {
 .status-tag.interviewing { background-color: #feebc8; color: #c05621; }
 .status-tag.offered { background-color: #c6f6d5; color: #22543d; }
 .status-tag.rejected { background-color: #fed7d7; color: #9b2c2c; }
+/* ATS/CRM: đánh giá sao + tag nội bộ */
+.star-rating {
+  display: flex;
+  gap: 4px;
+}
+
+.star-rating .star {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+  color: #cbd5e0;
+  padding: 0;
+}
+
+.star-rating .star.filled {
+  color: #f6ad55;
+}
+
+.ats-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+
+.ats-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #e2e8f0;
+  color: #2d3748;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.ats-tag-chip button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #4a5568;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+}
+
+.ats-tag-chip button:hover {
+  color: #c53030;
+}
 
 /* Backdrop cho các Modals */
 .modal-backdrop {

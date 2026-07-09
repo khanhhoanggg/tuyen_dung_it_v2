@@ -37,6 +37,9 @@ export type Application = {
   candidate: string | User;
   status: ApplicationStatus;
   message?: string;
+  rating?: number;
+  internalNote?: string;
+  tags: string[];
   createdAt: string;
   updatedAt: string;
 };
@@ -333,6 +336,24 @@ export async function updateApplicationStatus(
   return request<Application>(`/api/applications/${applicationId}/status`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
+  });
+}
+
+// ---------- ATS/CRM: đánh giá + ghi chú nội bộ ----------
+
+export type ApplicationAtsInput = {
+  rating?: number;
+  internalNote?: string;
+  tags?: string[];
+};
+
+export async function updateApplicationAts(
+  applicationId: string,
+  payload: ApplicationAtsInput
+): Promise<Application> {
+  return request<Application>(`/api/applications/${applicationId}/ats`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
   });
 }
 
