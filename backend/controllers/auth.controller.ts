@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import User from "../models/user.model";
-import { registerSchema, loginSchema } from "../validates/auth.validate";
+import { registerSchema, loginSchema, resendVerificationSchema  } from "../validates/auth.validate";
 import { sendVerificationEmail } from "../services/email.service";
 import {
   hashPassword,
@@ -102,6 +102,12 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({
         code: "invalid_credentials",
         message: "Email hoac mat khau khong dung",
+      });
+    }
+    if (!user.isEmailVerified) {
+      return res.status(403).json({
+        code: "email_not_verified",
+        message: "Vui long xac thuc email truoc khi dang nhap",
       });
     }
 
@@ -291,6 +297,54 @@ export const verifyEmail = async (req: Request, res: Response) => {
     });
   } catch (err) {
     console.error("Verify email error:", err);
+    return res.status(500).json({
+      code: "server_error",
+      message: "Co loi xay ra, vui long thu lai sau",
+    });
+  }
+};
+export const resendVerification = async (req: Request, res: Response) => {
+  try {
+    const { error, value } = resendVerificationSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      return res.status(400).json({
+        code: "validation_error",
+        message: error.details.map((detail) => detail.message),
+      });
+    }
+
+    const { email } = value;
+    const user = await User.findOne({ email });
+
+    // Khong tiet lo email co ton tai hay khong, luon tra ve cung 1 thong diep
+    const genericResponse = {
+      code: "success",
+      message:
+        "Neu email ton tai va chua xac thuc, mot email xac thuc moi da duoc gui",
+    };
+
+    if (!user || user.isEmailVerified) {
+      return res.status(200).json(genericResponse);
+    }
+
+    const { rawToken, hashedToken } = generateEmailVerificationToken();
+
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await user.save();
+
+    try {
+      await sendVerificationEmail(user.email, rawToken);
+    } catch (mailErr) {
+      console.error("Resend verification email error:", mailErr);
+    }
+
+    return res.status(200).json(genericResponse);
+  } catch (err) {
+    console.error("Resend verification error:", err);
     return res.status(500).json({
       code: "server_error",
       message: "Co loi xay ra, vui long thu lai sau",

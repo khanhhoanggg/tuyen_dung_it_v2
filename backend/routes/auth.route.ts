@@ -6,6 +6,7 @@ import {
   refresh,
   logout,
   verifyEmail,
+  resendVerification,
 } from "../controllers/auth.controller";
 import { requireAuth } from "../middlewares/auth.middleware";
 import { authRateLimiter } from "../middlewares/rateLimit.middleware";
@@ -18,5 +19,6 @@ router.post("/refresh", refresh);
 router.post("/logout", logout);
 router.get("/me", requireAuth, getMe);
 router.get("/verify", verifyEmail);
+router.post("/resend-verification", authRateLimiter, resendVerification);
 
 export default router;

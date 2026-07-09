@@ -34,3 +34,9 @@ export const loginSchema = Joi.object({
     "string.empty": "Mat khau khong duoc de trong",
   }),
 });
+export const resendVerificationSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Email khong dung dinh dang",
+    "string.empty": "Email khong duoc de trong",
+  }),
+});

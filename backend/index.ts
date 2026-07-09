@@ -30,8 +30,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+app.use(helmet());
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
+app.use(sanitizeBody); 
 app.use(cookieParser());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -52,9 +54,6 @@ app.use("/api/invitations", jobInvitationRoutes);
 app.use("/api", interviewScheduleRoutes);
 app.use("/api", offerRoutes);
 app.use("/api", messageRoutes);
-app.use(helmet());
-app.use(express.json());
-app.use(sanitizeBody);
 
 const startServer = async () => {
   await connectDatabase();
