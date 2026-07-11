@@ -1,7 +1,13 @@
 import { Request, Response } from "express";
 import User from "../models/user.model";
-import { registerSchema, loginSchema, resendVerificationSchema  } from "../validates/auth.validate";
-import { sendVerificationEmail } from "../services/email.service";
+import {
+  registerSchema,
+  loginSchema,
+  resendVerificationSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "../validates/auth.validate";
+import { sendVerificationEmail, sendResetPasswordEmail } from "../services/email.service";
 import {
   hashPassword,
   comparePassword,
@@ -10,7 +16,18 @@ import {
   verifyRefreshToken,
   generateEmailVerificationToken,
   hashEmailVerificationToken,
+  generatePasswordResetToken,
+  hashPasswordResetToken,
 } from "../services/auth.service";
+
+const EMAILS_WITHOUT_VERIFICATION = new Set([
+  "test@example1.com",
+  "company-demo@devjobs.vn",
+]);
+
+function canSkipEmailVerification(email: string) {
+  return EMAILS_WITHOUT_VERIFICATION.has(email.toLowerCase());
+}
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -36,22 +53,28 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const hashedPassword = await hashPassword(password);
-    const { rawToken, hashedToken } = generateEmailVerificationToken();
+    const skipEmailVerification = canSkipEmailVerification(email);
+    const verificationToken = skipEmailVerification ? null : generateEmailVerificationToken();
 
     const newUser = await User.create({
       fullName,
       email,
       password: hashedPassword,
       role,
-      emailVerificationToken: hashedToken,
-      emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+      isEmailVerified: skipEmailVerification,
+      emailVerificationToken: verificationToken?.hashedToken,
+      emailVerificationExpires: verificationToken
+        ? new Date(Date.now() + 24 * 60 * 60 * 1000)
+        : undefined,
     });
 
-    try {
-      await sendVerificationEmail(newUser.email, rawToken);
-    } catch (mailErr) {
-      console.error("Send verification email error:", mailErr);
-      // Khong rollback user, chi log loi - user van co the request gui lai email sau
+    if (verificationToken) {
+      try {
+        await sendVerificationEmail(newUser.email, verificationToken.rawToken);
+      } catch (mailErr) {
+        console.error("Send verification email error:", mailErr);
+        // Khong rollback user, chi log loi - user van co the request gui lai email sau
+      }
     }
 
     return res.status(201).json({
@@ -104,7 +127,7 @@ export const login = async (req: Request, res: Response) => {
         message: "Email hoac mat khau khong dung",
       });
     }
-    if (!user.isEmailVerified) {
+    if (!user.isEmailVerified && !canSkipEmailVerification(user.email)) {
       return res.status(403).json({
         code: "email_not_verified",
         message: "Vui long xac thuc email truoc khi dang nhap",
@@ -345,6 +368,101 @@ export const resendVerification = async (req: Request, res: Response) => {
     return res.status(200).json(genericResponse);
   } catch (err) {
     console.error("Resend verification error:", err);
+    return res.status(500).json({
+      code: "server_error",
+      message: "Co loi xay ra, vui long thu lai sau",
+    });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { error, value } = forgotPasswordSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      return res.status(400).json({
+        code: "validation_error",
+        message: error.details.map((detail) => detail.message),
+      });
+    }
+
+    const { email } = value;
+    const user = await User.findOne({ email });
+
+    const genericResponse = {
+      code: "success",
+      message: "Neu email ton tai, mot lien ket khoi phuc mat khau da duoc gui",
+    };
+
+    if (!user) {
+      return res.status(200).json(genericResponse);
+    }
+
+    const { rawToken, hashedToken } = generatePasswordResetToken();
+
+    user.passwordResetToken = hashedToken;
+    user.passwordResetExpires = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+    await user.save();
+
+    try {
+      await sendResetPasswordEmail(user.email, rawToken);
+    } catch (mailErr) {
+      console.error("Send reset password email error:", mailErr);
+    }
+
+    return res.status(200).json(genericResponse);
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    return res.status(500).json({
+      code: "server_error",
+      message: "Co loi xay ra, vui long thu lai sau",
+    });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { error, value } = resetPasswordSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      return res.status(400).json({
+        code: "validation_error",
+        message: error.details.map((detail) => detail.message),
+      });
+    }
+
+    const { token, password } = value;
+    const hashedToken = hashPasswordResetToken(token);
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: new Date() },
+    }).select("+passwordResetToken +passwordResetExpires");
+
+    if (!user) {
+      return res.status(400).json({
+        code: "invalid_or_expired_token",
+        message: "Token khong hop le hoac da het han",
+      });
+    }
+
+    const hashedPassword = await hashPassword(password);
+    user.password = hashedPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    user.tokenVersion += 1; // Invalidate all active sessions/cookies
+    await user.save();
+
+    return res.status(200).json({
+      code: "success",
+      message: "Dat lai mat khau thanh cong",
+    });
+  } catch (err) {
+    console.error("Reset password error:", err);
     return res.status(500).json({
       code: "server_error",
       message: "Co loi xay ra, vui long thu lai sau",

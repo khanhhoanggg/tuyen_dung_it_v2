@@ -40,3 +40,26 @@ export const resendVerificationSchema = Joi.object({
     "string.empty": "Email khong duoc de trong",
   }),
 });
+
+export const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Email khong dung dinh dang",
+    "string.empty": "Email khong duoc de trong",
+  }),
+});
+
+export const resetPasswordSchema = Joi.object({
+  token: Joi.string().required().messages({
+    "string.empty": "Token khong duoc de trong",
+  }),
+  password: Joi.string()
+    .min(8)
+    .pattern(new RegExp("(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])"))
+    .required()
+    .messages({
+      "string.min": "Mat khau moi phai co it nhat 8 ky tu",
+      "string.pattern.base":
+        "Mat khau moi phai gom chu hoa, chu thuong, so va ky tu dac biet",
+      "string.empty": "Mat khau moi khong duoc de trong",
+    }),
+});

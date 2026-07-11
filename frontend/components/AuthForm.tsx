@@ -14,6 +14,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [role, setRole] = useState<Role>("candidate");
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,8 +40,8 @@ export function AuthForm({ mode }: AuthFormProps) {
           role,
         });
         setStatus("success");
-        setMessage("Đăng ký tài khoản thành công. Bạn có thể đăng nhập ngay.");
-        setTimeout(() => router.push("/login"), 1000);
+        setMessage("Đăng ký tài khoản thành công. Vui lòng kiểm tra email của bạn để xác minh tài khoản trước khi đăng nhập.");
+        setTimeout(() => router.push("/login"), 5000);
       }
     } catch (error) {
       setStatus("error");
@@ -82,8 +83,55 @@ export function AuthForm({ mode }: AuthFormProps) {
             <input name="email" type="email" placeholder="you@example.com" required />
           </label>
           <label>
-            Mật khẩu
-            <input name="password" type="password" placeholder="Tối thiểu 8 ký tự" required minLength={8} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span>Mật khẩu</span>
+              {!isRegister && (
+                <Link href="/forgot-password" style={{ fontSize: "0.82rem", fontWeight: 500, color: "var(--signal)" }}>
+                  Quên mật khẩu?
+                </Link>
+              )}
+            </div>
+            <div style={{ position: "relative", width: "100%" }}>
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Tối thiểu 8 ký tự"
+                required
+                minLength={8}
+                style={{ width: "100%", paddingRight: "44px" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  color: "var(--muted)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+                title={showPassword ? "Ẩn mật khẩu" : "Hiển thị mật khẩu"}
+              >
+                {showPassword ? (
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </label>
           {isRegister && (
             <div className="role-select">

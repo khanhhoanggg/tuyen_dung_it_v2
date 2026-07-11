@@ -203,6 +203,24 @@ export async function register(payload: AuthPayload): Promise<User> {
     body: JSON.stringify(payload),
   });
 }
+
+export async function verifyEmail(token: string): Promise<void> {
+  return request<void>(`/api/auth/verify?token=${token}`);
+}
+
+export async function forgotPassword(email: string): Promise<void> {
+  return request<void>("/api/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(payload: { token: string; password: string }): Promise<void> {
+  return request<void>("/api/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
 export async function logout(): Promise<void> {
   try {
     await fetch(`${API_URL}/api/auth/logout`, {
