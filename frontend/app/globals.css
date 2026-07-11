@@ -143,6 +143,7 @@ select:focus-visible {
 /* ---------- Buttons ---------- */
 
 .primary-button,
+.danger-button,
 .ghost-button,
 .hero button,
 .auth-form button,
@@ -167,12 +168,31 @@ select:focus-visible {
   background: var(--signal);
 }
 
+.danger-button {
+  display: inline-grid;
+  place-items: center;
+  color: #ffffff;
+  background: #ef4444;
+}
+
 .primary-button:hover,
 .hero button:hover,
 .auth-form button:hover,
 .dashboard-top button:hover,
 .apply-panel button:hover {
   background: var(--signal-dark);
+}
+
+.danger-button:hover {
+  background: #dc2626;
+}
+
+.primary-button:hover,
+.danger-button:hover,
+.hero button:hover,
+.auth-form button:hover,
+.dashboard-top button:hover,
+.apply-panel button:hover {
   transform: translateY(-1px);
 }
 
@@ -243,10 +263,6 @@ select:focus-visible {
   letter-spacing: 0;
 }
 
-.eyebrow::before {
-  content: "// ";
-  opacity: 0.65;
-}
 
 .hero h1,
 .auth-copy h1,
@@ -500,11 +516,62 @@ select:focus-visible {
   padding: 9px 14px;
   background: #ffffff;
   font-weight: 600;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
 
 .job-actions button:hover,
 .table-row button:hover {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+/* Specific overrides to prevent generic .table-row button overrides */
+.job-actions .primary-button,
+.table-row .primary-button {
+  background: var(--signal);
+  color: #ffffff;
+  border: 0;
+}
+.job-actions .primary-button:hover,
+.table-row .primary-button:hover {
+  background: var(--signal-dark);
+  color: #ffffff;
+  border: 0;
+}
+
+.job-actions .danger-button,
+.table-row .danger-button {
+  background: #ef4444;
+  color: #ffffff;
+  border: 0;
+}
+.job-actions .danger-button:hover,
+.table-row .danger-button:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border: 0;
+}
+
+.job-actions .ghost-button,
+.table-row .ghost-button {
+  background: var(--soft);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+.job-actions .ghost-button:hover,
+.table-row .ghost-button:hover {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+.job-actions .secondary-button,
+.table-row .secondary-button {
+  background: #ffffff;
+  color: var(--navy);
+  border: 1px solid var(--line);
+}
+.job-actions .secondary-button:hover,
+.table-row .secondary-button:hover {
   border-color: var(--signal);
   color: var(--signal);
 }

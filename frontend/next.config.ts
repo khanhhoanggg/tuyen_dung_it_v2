@@ -44,6 +44,16 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  async redirects() {
+    return [
+      {
+        source: "/dashboard/company_profile",
+        destination: "/dashboard/company-profile",
+        permanent: true,
+      },
+    ];
+  },
+
   // Nếu dùng App Router thì bật experimental (tùy chọn)
   // experimental: {
   //   serverActions: true,

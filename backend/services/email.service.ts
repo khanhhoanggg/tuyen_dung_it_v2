@@ -1,19 +1,27 @@
 import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: false, // true nếu dùng port 465
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+let transporter: nodemailer.Transporter | null = null;
+
+const getTransporter = () => {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: false, // true nếu dùng port 465
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+  }
+  return transporter;
+};
 
 export const sendVerificationEmail = async (to: string, token: string) => {
   const verifyUrl = `${process.env.FRONTEND_URL}/verify?token=${token}`;
+  const activeTransporter = getTransporter();
 
-  await transporter.sendMail({
+  await activeTransporter.sendMail({
     from: process.env.EMAIL_FROM,
     to,
     subject: "Xac thuc email - DevJobs Vietnam",

@@ -104,6 +104,7 @@ async function seed() {
       email: DEMO_COMPANY.email,
       password: hashedPassword,
       role: DEMO_COMPANY.role,
+      isEmailVerified: true,
     });
     console.log("Da tao tai khoan company demo:");
   } else {

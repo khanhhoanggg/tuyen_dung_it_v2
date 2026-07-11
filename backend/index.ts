@@ -2,10 +2,12 @@ import dns from "dns";
 dns.setDefaultResultOrder("ipv4first");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
 import path from "path";
 import { connectDatabase } from "./config/database";
 import authRoutes from "./routes/auth.route";
@@ -24,8 +26,6 @@ import messageRoutes from "./routes/message.route";
 import helmet from "helmet";
 import { sanitizeBody } from "./middlewares/sanitize.middleware";
 import { authRateLimiter } from "./middlewares/rateLimit.middleware";
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
