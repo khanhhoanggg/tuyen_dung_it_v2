@@ -53,17 +53,10 @@ DATABASE_URL=mongodb+srv://<user>:<password>@cluster.mongodb.net/recruitment_db
 ACCESS_TOKEN_SECRET=your_jwt_access_token_secret
 REFRESH_TOKEN_SECRET=your_jwt_refresh_token_secret
 
-# Cấu hình Mail Server (SMTP)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=userknh518@gmail.com
-SMTP_PASS=zdya wfjy parc tfkd
-EMAIL_FROM="DevJobs Vietnam <userknh518@gmail.com>"
-
 # Địa chỉ Client Frontend
 FRONTEND_URL=http://localhost:3000
 ```
-*(Lưu ý: Mật khẩu ứng dụng Gmail `SMTP_PASS` phải được cấp phép thông qua cài đặt 2-Factor Authentication của tài khoản).*
+
 
 ### 3. Khởi chạy dự án
 Chạy lệnh sau tại thư mục gốc để bắt đầu chạy đồng thời cả frontend và backend ở chế độ phát triển (development):
